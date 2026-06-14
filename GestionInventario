@@ -1,0 +1,169 @@
+
+# FUNCIONES DE VALIDACIÓN (OPCIÓN 1)
+
+
+def validar_nombre(nombre):
+    """Retorna True si el nombre no está vacío ni contiene solo espacios."""
+    return nombre.strip() != ""
+
+def validar_precio(precio_str):
+    """Retorna True si el precio es un decimal mayor que cero."""
+    try:
+        precio = float(precio_str)
+        return precio > 0
+    except ValueError:
+        return False
+
+def validar_stock(stock_str):
+    """Retorna True si el stock es un entero mayor o igual a cero."""
+    try:
+        stock = int(stock_str)
+        return stock >= 0
+    except ValueError:
+        return False
+
+
+
+# FUNCIONES DEL MENÚ
+
+
+def mostrar_menu():
+    """Muestra las opciones del menú en pantalla."""
+    print("\n========== MENÚ PRINCIPAL ==========")
+    print("1. Agregar producto")
+    print("2. Buscar producto")
+    print("3. Eliminar producto")
+    print("4. Actualizar disponibilidad")
+    print("5. Mostrar productos")
+    print("6. Salir")
+    print("=====================================")
+
+def leer_opcion():
+    """Lee, valida y retorna una opción numérica del menú."""
+    while True:
+        opcion_str = input("Seleccione una opción: ")
+        try:
+            opcion = int(opcion_str)
+            if 1 <= opcion <= 6:
+                return opcion
+            else:
+                print("Opción inválida. Debe ser un número entre 1 y 6.")
+        except ValueError:
+            print("Entrada inválida. Por favor, ingrese un número entero.")
+
+
+# FUNCIONES DE OPERACIONES DEL SISTEMA
+
+
+def agregar_producto(inventario):
+    """Solicita los datos de un producto, los valida y lo agrega a la lista."""
+    nombre = input("Ingrese el nombre del producto: ")
+    precio_str = input("Ingrese el precio del producto: ")
+    stock_str = input("Ingrese el stock del producto: ")
+
+    # Validaciones individuales 
+    if not validar_nombre(nombre):
+        print("Error: El nombre no puede estar vacío ni contener solo espacios en blanco.")
+        return
+
+    if not validar_precio(precio_str):
+        print("Error: El precio debe ser un número decimal mayor que cero.")
+        return
+
+    if not validar_stock(stock_str):
+        print("Error: El stock debe ser un número entero mayor o igual a cero.")
+        return
+
+    # Si todo es válido, se crea el diccionario y se añade
+    nuevo_producto = {
+        "nombre": nombre.strip(),
+        "precio": float(precio_str),
+        "stock": int(stock_str),
+        "disponible": False  # Asignado automáticamente en False al registrar
+    }
+    inventario.append(nuevo_producto)
+    print(f"Producto '{nuevo_producto['nombre']}' registrado exitosamente.")
+
+def buscar_producto(inventario, nombre_buscar):
+    """Busca un producto por su nombre exacto y retorna su posición o -1."""
+    for i in range(len(inventario)):
+        if inventario[i]["nombre"] == nombre_buscar:
+            return i
+    return -1
+
+def eliminar_producto(inventario):
+    """Busca un producto por nombre y lo elimina si existe."""
+    nombre_eliminar = input("Ingrese el nombre del producto que desea eliminar: ")
+    posicion = buscar_producto(inventario, nombre_eliminar)
+    
+    if posicion != -1:
+        producto_eliminado = inventario.pop(posicion)
+        print(f"El producto '{producto_eliminado['nombre']}' ha sido eliminado.")
+    else:
+        print(f"El producto '{nombre_eliminar}' no se encuentra registrado.")
+
+def actualizar_disponibilidad(inventario):
+    """Actualiza el campo disponible de todos los productos según su stock."""
+    for producto in inventario:
+        if producto["stock"] > 0:
+            producto["disponible"] = True
+        else:
+            producto["disponible"] = False
+
+def mostrar_productos(inventario):
+    """Actualiza la disponibilidad y muestra la lista completa de productos."""
+    actualizar_disponibilidad(inventario)
+    
+    print("\n=== LISTA DE PRODUCTOS ===")
+    if not inventario:
+        print("(El inventario se encuentra vacío)")
+        return
+        
+    for producto in inventario:
+        estado = "DISPONIBLE" if producto["disponible"] else "SIN STOCK"
+        print(f"Nombre: {producto['nombre']}")
+        # Se formatea el precio como entero si no tiene decimales significativos
+        precio_formato = int(producto['precio']) if producto['precio'].is_integer() else producto['precio']
+        print(f"Precio: ${precio_formato}")
+        print(f"Stock: {producto['stock']}")
+        print(f"Estado: {estado}")
+        print("*******************************************")
+
+
+# PROGRAMA PRINCIPAL
+
+
+def main():
+    # La colección inicia vacía
+    inventario_tienda = []
+    
+    while True:
+        mostrar_menu()
+        opcion = leer_opcion()
+        
+        if opcion == 1:
+            agregar_producto(inventario_tienda)
+        elif opcion == 2:
+            nombre_buscar = input("Ingrese el nombre del producto a buscar: ")
+            posicion = buscar_producto(inventario_tienda, nombre_buscar)
+            if posicion != -1:
+                print(f"\nProducto encontrado en la posición: {posicion}")
+                prod = inventario_tienda[posicion]
+                estado = "DISPONIBLE" if prod["disponible"] else "SIN STOCK"
+                print(f"Nombre: {prod['nombre']} | Precio: ${prod['precio']} | Stock: {prod['stock']} | Estado: {estado}")
+            else:
+                print("Producto no encontrado.")
+        elif opcion == 3:
+            eliminar_producto(inventario_tienda)
+        elif opcion == 4:
+            actualizar_disponibilidad(inventario_tienda)
+            print("Disponibilidad de todos los productos actualizada con éxito.")
+        elif opcion == 5:
+            mostrar_productos(inventario_tienda)
+        elif opcion == 6:
+            print("\nGracias por usar el sistema de inventario. Hasta pronto")
+            break
+
+# Ejecución del programa
+if __name__ == "__main__":
+    main()
